@@ -1,0 +1,48 @@
+//Create ML Context with seed for repeteable/deterministic results
+            MLContext mlContext = new MLContext(seed: 0);
+
+            // STEP 1: read the data
+            IDataView baseTrainingDataView = mlContext.Data.LoadFromTextFile<polandhouseprice>("C:\\Users\\923400221916\\Downloads\\archive (6)\\apartments_pl_2023_08.csv", hasHeader: true, separatorChar: ',');
+            //split the testing and training data
+            TrainTestData dataSplit = mlContext.Data.TrainTestSplit(baseTrainingDataView, testFraction: 0.2);
+            IDataView trainngDataView = dataSplit.TrainSet;
+            IDataView testDataView= dataSplit.TestSet;
+            //prepare the data
+            var dataProcessPipeline = mlContext.Transforms.CopyColumns(outputColumnName: "Label", inputColumnName: nameof(polandhouseprice.price))
+                                        .Append(mlContext.Transforms.Categorical.OneHotEncoding(outputColumnName: "cityname", inputColumnName: nameof(polandhouseprice.city)))
+                                        .Append(mlContext.Transforms.Categorical.OneHotEncoding(outputColumnName: "typeofhome", inputColumnName: nameof(polandhouseprice.type)))
+                                        .Append(mlContext.Transforms.Categorical.OneHotEncoding(outputColumnName: "conditionofhome", inputColumnName: nameof(polandhouseprice.condition)))
+                                        .Append(mlContext.Transforms.Categorical.OneHotEncoding(outputColumnName: "OwnerShipofhome", inputColumnName: nameof(polandhouseprice.ownership)))
+                                        .Append(mlContext.Transforms.Categorical.OneHotEncoding(outputColumnName: "Materialbuild", inputColumnName: nameof(polandhouseprice.buildingMaterial)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.squaremeter)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.rooms)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.floor)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.floorCount)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.buildyear)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.latitude)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.longitude)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.centerDistance)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.poiCount)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.schoolDistance)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.clinicdistance)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.postoffice)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.restaurantdistance)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.collegedistance)))
+                                        .Append(mlContext.Transforms.NormalizeMeanVariance(outputColumnName: nameof(polandhouseprice.pharmacydistance)))
+                                        .Append(mlContext.Transforms.Conversion.ConvertType("ispark", nameof(polandhouseprice.hasparking), DataKind.Single))
+                                        .Append(mlContext.Transforms.Conversion.ConvertType("isbalcon", nameof(polandhouseprice.hasbalcon), DataKind.Single))
+                                        .Append(mlContext.Transforms.Conversion.ConvertType("iselevate", nameof(polandhouseprice.haselevate), DataKind.Single))
+                                        .Append(mlContext.Transforms.Conversion.ConvertType("issecurity", nameof(polandhouseprice.hassecurity), DataKind.Single))
+                                        .Append(mlContext.Transforms.Conversion.ConvertType("isstorage", nameof(polandhouseprice.hasStorage), DataKind.Single))
+                                        .Append(mlContext.Transforms.Concatenate("Features","cityname","typeofhome", "conditionofhome", "OwnerShipofhome", "Materialbuild","ispark","isbalcon","iselevate","issecurity","isstorage", nameof(polandhouseprice.squaremeter)
+                                        , nameof(polandhouseprice.rooms), nameof(polandhouseprice.floor), nameof(polandhouseprice.floorCount), nameof(polandhouseprice.buildyear), nameof(polandhouseprice.latitude), nameof(polandhouseprice.longitude), nameof(polandhouseprice.centerDistance), nameof(polandhouseprice.poiCount), nameof(polandhouseprice.schoolDistance), nameof(polandhouseprice.clinicdistance)
+                                        , nameof(polandhouseprice.postoffice), nameof(polandhouseprice.kindergardendistance), nameof(polandhouseprice.restaurantdistance), nameof(polandhouseprice.collegedistance), nameof(polandhouseprice.pharmacydistance)));
+
+
+            // STEP 3: Set the training algorithm, then create and config the modelBuilder - Selected Trainer (SDCA Regression algorithm)                            
+            var trainer = mlContext.Regression.Trainers.LbfgsPoissonRegression(labelColumnName: "Label", featureColumnName: "Features");
+            var trainingPipeline = dataProcessPipeline.Append(trainer);
+            var trainedModel = trainingPipeline.Fit(trainngDataView);
+            IDataView predictions = trainedModel.Transform(testDataView);
+            var metrics = mlContext.Regression.Evaluate(predictions, labelColumnName: "Label", scoreColumnName: "Score");
+            MessageBox.Show(metrics.RSquared.ToString());

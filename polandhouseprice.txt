@@ -1,0 +1,67 @@
+using Microsoft.ML.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Sentimentanaylsisusingai.DataStructures
+{
+    public class polandhouseprice
+    {
+        [LoadColumn(1)]
+        public string city { get; set; }
+        [LoadColumn(2)]
+        public string type { get; set; }
+        [LoadColumn(3)]
+        public float squaremeter { get; set; }
+        [LoadColumn(4)]
+        public float rooms { get; set; }
+        [LoadColumn(5)]
+        public float floor { get; set; }
+        [LoadColumn(6)]
+        public float floorCount{ get; set; }
+        [LoadColumn(7)]
+        public float buildyear { get; set; }
+        [LoadColumn(8)]
+        public float latitude { get; set; }
+        [LoadColumn(9)]
+        public float longitude { get; set; }
+        [LoadColumn(10)]
+        public float centerDistance { get; set; }
+        [LoadColumn(11)]
+        public float poiCount { get; set; }
+        [LoadColumn(12)]
+        public float schoolDistance { get; set;}
+        [LoadColumn(13)]
+        public float clinicdistance { get; set;}
+        [LoadColumn(14)]
+        public float postoffice { get;set; }
+        [LoadColumn(15)]
+        public float kindergardendistance { get; set;}
+        [LoadColumn(16)]
+        public float restaurantdistance { get;set; }
+        [LoadColumn(17)]
+        public float collegedistance { get;set; }
+        [LoadColumn(18)]
+        public float pharmacydistance { get;set; }
+        [LoadColumn(19)]
+        public string ownership { get; set; }
+        [LoadColumn(20)]
+        public string buildingMaterial { get; set; }
+        [LoadColumn(21)]
+        public string condition { get; set; }
+        [LoadColumn(22)]
+        public bool hasparking { get; set; }
+        [LoadColumn(23)]
+        public bool hasbalcon { get; set;}
+        [LoadColumn(24)]
+        public bool haselevate { get; set;}
+        [LoadColumn(25)]
+        public bool hassecurity { get;set; }
+        [LoadColumn(26)]
+        public bool hasStorage { get; set;}
+        [LoadColumn(27)]
+        public float price { get; set;}
+    }
+}
